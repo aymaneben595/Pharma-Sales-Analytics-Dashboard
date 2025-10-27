@@ -23,10 +23,10 @@ Insights and recommendations are provided across four main areas:
 4.  **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by specific sales reps, countries, and time periods.
 
 🔗 **SQL ETL Script:**
-**[View ETL & Analytics Script (etl\_pharma.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
+**[View ETL & Analytics Script (etl\_customers.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
 
 🐍 **Python ETL/Analysis Script:**
-**[View Python ETL Script](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
+**[View ETL & Analytics Script (etl\_pipeline.py)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
 
 📊 **Dashboard:**
 **[Download Pharma Sales Dashboard.pbix](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/060c60af937bf5d403f8c462343349cb9ed070e8/Power%20Bi/Pharma%20Sales%20Light%20Mode%20Dashboard.pbix)**
