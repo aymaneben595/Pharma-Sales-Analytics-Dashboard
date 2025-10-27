@@ -4,11 +4,11 @@
 
 ## 📘 Project Background
 
-This is a personal data analytics project analyzing pharmaceutical sales data to generate actionable insights for sales management and product strategy.
+This is a personal data analytics project analyzing pharmaceutical sales data to generate actionable insights across **sales management** and **product strategy**.
 
-The focus is on identifying performance drivers and optimizing product distribution across key geographic regions.
+The dataset simulates a multi-product pharmaceutical sales environment with focus on **performance tracking**, **product mix optimization**, and **geographic distribution**.
 
-Key Performance Indicators (KPIs) tracked include:
+Key performance indicators (KPIs) tracked include:
 
 * **Total Amount (USD)**
 * **Total Boxes Shipped**
@@ -17,30 +17,34 @@ Key Performance Indicators (KPIs) tracked include:
 
 Insights and recommendations are provided across four main areas:
 
-1.  **Sales Trends & Volume Analysis:** Evaluation of overall financial performance and transaction volume over time.
-2.  **Product & Category Performance:** Identifying top-selling products, category contributions to revenue, and product mix.
-3.  **Sales Person Performance:** Analyzing individual sales rep metrics (revenue, volume) and identifying top performers.
-4.  **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by specific sales reps, countries, and time periods.
+1.  **Sales Trends Analysis:** Revenue and transaction volume patterns over time.
+2.  **Product & Category Performance:** Identifying top products and category contributions to revenue.
+3.  **Salesperson Performance:** Evaluating individual sales rep metrics and top performers.
+4.  **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by sales reps, countries, and time periods.
 
-🔗 **SQL ETL Script:**
-**[View ETL & Analytics Script (etl\_customers.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
+🔗 **SQL ETL Script:**  
+**[View ETL & Analytics Script (etl_customers.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
 
-🐍 **Python ETL/Analysis Script:**
-**[View ETL & Analytics Script (etl\_pipeline.py)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
+🐍 **Python ETL/Analysis Script:**  
+**[View ETL & Analytics Script (etl_pipeline.py)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
 
-📊 **Dashboard:**
-**[Download Pharma Sales Dashboard.pbix](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/060c60af937bf5d403f8c462343349cb9ed070e8/Power%20Bi/Pharma%20Sales%20Light%20Mode%20Dashboard.pbix)**
+📊 **Dashboard:**  
+**[⬇️ Download Pharma Sales Light Mode Dashboard.pbix](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/060c60af937bf5d403f8c462343349cb9ed070e8/Power%20Bi/Pharma%20Sales%20Light%20Mode%20Dashboard.pbix)**
 
 ---
 
 ## 🧩 Data Structure & Initial Checks
 
-The dashboard is built on consolidated and cleaned sales data. Key metrics across all regions show:
+After a full **ETL process in PostgreSQL**, the dataset contains clean transaction records with key metrics:
 
 * **Total Amount:** $58.93K
 * **Total Boxes Shipped:** 3K
+* **Total Transactions:** 333
 
-The data is structured to support detailed analysis across products, sales personnel, and geography.
+Two main analytical artifacts were produced:
+
+* **`pharma_sales`** → Final structured transaction table (one row per sale)
+* **`vw_sales_export`** → Analytical view for BI tools (with calculated fields like `month_label`, `category`, `ASV`)
 
 <p align="center">
   <img src="Images/pharma_exp.png" alt="Entity Relationship Diagram (ERD)">
@@ -52,11 +56,11 @@ The data is structured to support detailed analysis across products, sales perso
 
 ### Overview of Findings
 
-The company maintains a steady revenue stream of **$58.93K Total Amount** with an **Average Sale Value (ASV) of $177**. The market shows moderate growth volatility, with a peak in **August 2022**. Key findings include:
+The pharmaceutical market generated **$58.93K in total revenue** with an **Average Sale Value (ASV) of $177**. Notable insights include:
 
 * **Top Performer:** **Rajesh Patel** leads all salespersons in total revenue.
 * **Product Focus:** Digestive, Antiseptic, and Nasal Spray categories drive revenue by volume.
-* **Transaction Volume:** The company completed **333 Total Transactions** across the period.
+* **Transaction Volume:** The company completed **333 transactions** across the period.
 
 <p align="center">
   <img src="Images/pharma.PNG" alt="Pharma Sales Overall Dashboard">
@@ -66,11 +70,11 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 
 ## 🔍 Insights Deep Dive
 
-### **Category 1: Sales Trends & Volume Analysis**
+### **Category 1: Sales Trends Analysis**
 
-* **Total Amount:** **$58.93K** from **333 Total Transactions**, confirming precise tracking of high-value transactions.
-* **Sales Trends Over Time:** Consistent month-over-month sales, peaking in **August 2022 ($8.8K)** and lowest in **February 2022 ($7.3K)**.
-* **Average Sale Value (ASV):** **$177**, indicating stable pricing and consistent basket size per transaction.
+* **Total Amount:** **$58.93K** from **333 transactions**, confirming precise tracking.
+* **Sales Trends Over Time:** Peaks in **August 2022 ($8.8K)**, lowest in **February 2022 ($7.3K)**.
+* **Average Sale Value (ASV):** **$177**, indicating stable pricing per transaction.
 
 <p align="center">
   <img src="Images/pharma over.PNG" alt="Sales Trend Chart">
@@ -78,31 +82,31 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 
 ### **Category 2: Product & Category Performance**
 
-* Top revenue-generating products are **Digestive Enzyme, Antiseptic Cream, and Nasal Spray**.
-* Sales Person **Priya Singh**'s detail view shows **Cough Syrup** as her top product ($1,626), followed by **Antiseptic Cream** ($1,540).
-* When filtered by **Nikhil Batra**, **Cough Syrup** generates the highest total amount ($493), followed by **Nasal Spray** ($488).
-* For **Priya Singh**, the largest categories by volume are **Cough Syrup (28%)** and **Antiseptic Cream (23%)**.
+* Top revenue-generating products: **Digestive Enzyme, Antiseptic Cream, Nasal Spray**.
+* **Priya Singh**'s top products: **Cough Syrup ($1,626)**, **Antiseptic Cream ($1,540)**.
+* **Nikhil Batra**'s top products: **Cough Syrup ($493)**, **Nasal Spray ($488)**.
+* **Category Volume Share:** **Cough Syrup (28%)**, **Antiseptic Cream (23%)** for Priya Singh.
 
 <p align="center">
   <img src="Images/pharma ring.PNG" alt="Product Sales by Category Chart">
 </p>
 
-### **Category 3: Sales Person Performance**
+### **Category 3: Salesperson Performance**
 
-* **Rajesh Patel** is the top performer in Total Amount, followed by **Nikhil Batra** and **Priya Singh**.
-* **Nikhil Batra**'s detail view shows he shipped **51** total boxes and sold **4** total products—key for commission tracking.
-* **Priya Singh** has a personal ASV of **$169** with **54** total products sold and **558** boxes shipped, slightly below the company average of $177.
+* **Rajesh Patel** tops total revenue, followed by **Nikhil Batra** and **Priya Singh**.
+* **Nikhil Batra:** 51 boxes shipped, 4 products sold.
+* **Priya Singh:** ASV **$169**, 54 products sold, 558 boxes shipped.
 
 <p align="center">
-  <img src="Images/pharma sales.PNG" alt="Top Sales Person Chart">
+  <img src="Images/pharma sales.PNG" alt="Top Salesperson Chart">
 </p>
 
 ### **Category 4: Geographic & Detail Analysis**
 
-* **Primary sales region:** **North America**, with most volume across the displayed regions.
-* **Priya Singh**’s filtered sales trend peaks at **$1.79K in July 2022** and hits a low of **$377.24 in April 2022**.
-* **Nikhil Batra in Canada** achieves an ASV of **$243**, significantly above the company average of $177, with a Total Amount of **$58.93K**.
-* In the filtered view for **Nikhil Batra in Canada**, the sales trend jumps from **$478.18 (April 22)** to **$493.54 (May 22)**.
+* **Primary region:** **North America**.
+* **Priya Singh:** Sales peak **$1.79K in July 2022**, low **$377.24 in April 2022**.
+* **Nikhil Batra in Canada:** ASV **$243**, Total Amount **$58.93K**.
+* Filtered trends: April 22 **$478.18 → May 22 $493.54**.
 
 <p align="center">
   <img src="Images/pharma3.PNG" alt="Detail View: Nikhil Batra Sales in Canada">
@@ -112,18 +116,18 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 
 ## 💡 Recommendations
 
-1.  **Investigate Seasonal Peak:** Analyze factors behind **August 2022 peak ($8.8K)** to replicate success in other months.
-2.  **Optimize Product Focus:** Shift marketing and inventory to **Digestive Enzyme, Antiseptic Cream, and Nasal Spray**, the top-performing products.
-3.  **Target High-ASV Segments:** Examine Nikhil Batra’s **$243 ASV in Canada** to replicate success with other reps or products.
-4.  **Sales Performance Coaching:** Develop coaching based on top performers like **Rajesh Patel** to uplift mid-to-low-tier salespersons.
+1. **Investigate Seasonal Peak:** Analyze **August 2022 peak ($8.8K)** to replicate success.
+2. **Optimize Product Focus:** Prioritize **Digestive Enzyme, Antiseptic Cream, Nasal Spray** in marketing & inventory.
+3. **Target High-ASV Segments:** Study Nikhil Batra’s **$243 ASV** for replication.
+4. **Sales Performance Coaching:** Use top performers like **Rajesh Patel** to uplift mid-to-low-tier reps.
 
 ---
 
 ## ⚙️ Assumptions & Caveats
 
-* **Currency:** All figures are standardized in **USD**.
-* **Time Filters:** Detail views use filters (Sales Person, Country, Date) and do not represent total company performance.
-* **Geographic Data:** Sales by country map depends on accurate geo-coding.
+* **Currency:** Figures standardized in **USD**.
+* **Time Filters:** Detail views filtered by Sales Person, Country, Date.
+* **Geographic Accuracy:** Dependent on correct geo-coding.
 
 <p align="center">
   <i>Created by Aïmane Benkhadda — Personal Data Analytics Project (Excel, SQL, Power BI, Python)</i>
