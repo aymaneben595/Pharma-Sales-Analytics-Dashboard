@@ -48,7 +48,7 @@ After a full **ETL process in PostgreSQL**, the dataset contains clean transacti
 Two main analytical artifacts were produced:
 
 * **`pharma_sales`** → Final structured transaction table (one row per sale)
-* **`vw_sales_export`** → Analytical view for BI tools (with calculated fields like `month_label`, `category`, `ASV`)
+* **`vw_sales_export`** → Analytical view for BI tools (with calculated fields like `month_label`, `category`)
 
 <p align="center">
   <img src="Images/pharma_exp.png" alt="Entity Relationship Diagram (ERD)">
