@@ -23,13 +23,13 @@ Insights and recommendations are provided across four main areas:
 4.  **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by specific sales reps, countries, and time periods.
 
 🔗 **SQL ETL Script:**
-**[View ETL & Analytics Script (etl\_pharma.sql)](Replace this link with your SQL file path)**
+**[View ETL & Analytics Script (etl\_pharma.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
 
 🐍 **Python ETL/Analysis Script:**
-**[View Python ETL Script](Replace this link with your Python file path)**
+**[View Python ETL Script](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
 
 📊 **Dashboard:**
-**[Download Pharma Sales Dashboard.pbix](Replace this link with your PBIX file path)**
+**[Download Pharma Sales Dashboard.pbix](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/060c60af937bf5d403f8c462343349cb9ed070e8/Power%20Bi/Pharma%20Sales%20Light%20Mode%20Dashboard.pbix)**
 
 ---
 
@@ -43,7 +43,7 @@ The dashboard is built on consolidated and cleaned sales data. Key metrics acros
 The data is structured to support detailed analysis across products, sales personnel, and geography.
 
 <p align="center">
-  <img src="Images/pharma_erd.png" alt="Entity Relationship Diagram (ERD)">
+  <img src="Images/pharma_exp.png" alt="Entity Relationship Diagram (ERD)">
 </p>
 
 ---
@@ -59,7 +59,7 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 * **Transaction Volume:** The company completed **333 Total Transactions** across the period.
 
 <p align="center">
-  <img src="pharma.jpg" alt="Pharma Sales Overall Dashboard">
+  <img src="Images/pharma.PNG" alt="Pharma Sales Overall Dashboard">
 </p>
 
 ---
@@ -73,7 +73,7 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 * **Average Sale Value (ASV):** **$177**, indicating stable pricing and consistent basket size per transaction.
 
 <p align="center">
-  <img src="" alt="Sales Trend Chart">
+  <img src="Images/pharma over.PNG" alt="Sales Trend Chart">
 </p>
 
 ### **Category 2: Product & Category Performance**
@@ -84,7 +84,7 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 * For **Priya Singh**, the largest categories by volume are **Cough Syrup (28%)** and **Antiseptic Cream (23%)**.
 
 <p align="center">
-  <img src="" alt="Product Sales by Category Chart">
+  <img src="Images/pharma ring.PNG" alt="Product Sales by Category Chart">
 </p>
 
 ### **Category 3: Sales Person Performance**
@@ -94,7 +94,7 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 * **Priya Singh** has a personal ASV of **$169** with **54** total products sold and **558** boxes shipped, slightly below the company average of $177.
 
 <p align="center">
-  <img src="" alt="Top Sales Person Chart">
+  <img src="Images/pharma sales.PNG" alt="Top Sales Person Chart">
 </p>
 
 ### **Category 4: Geographic & Detail Analysis**
@@ -105,7 +105,7 @@ The company maintains a steady revenue stream of **$58.93K Total Amount** with a
 * In the filtered view for **Nikhil Batra in Canada**, the sales trend jumps from **$478.18 (April 22)** to **$493.54 (May 22)**.
 
 <p align="center">
-  <img src="pharma3.jpg" alt="Detail View: Nikhil Batra Sales in Canada">
+  <img src="Images/pharma3.PNG" alt="Detail View: Nikhil Batra Sales in Canada">
 </p>
 
 ---
