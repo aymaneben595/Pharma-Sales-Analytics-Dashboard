@@ -6,7 +6,11 @@
 
 This is a personal data analytics project analyzing pharmaceutical sales data to generate actionable insights across **sales management** and **product strategy**.
 
-The dataset simulates a multi-product pharmaceutical sales environment with focus on **performance tracking**, **product mix optimization**, and **geographic distribution**.
+The dataset simulates a multi-product pharmaceutical sales environment with focus on:
+
+* **performance tracking**
+* **product mix optimization**
+* **geographic distribution**
 
 Key performance indicators (KPIs) tracked include:
 
