@@ -17,10 +17,10 @@ Key performance indicators (KPIs) tracked include:
 
 Insights and recommendations are provided across four main areas:
 
-1.  **Sales Trends Analysis:** Revenue and transaction volume patterns over time.
-2.  **Product & Category Performance:** Identifying top products and category contributions to revenue.
-3.  **Salesperson Performance:** Evaluating individual sales rep metrics and top performers.
-4.  **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by sales reps, countries, and time periods.
+1. **Sales Trends Analysis:** Revenue and transaction volume patterns over time  
+2. **Product & Category Performance:** Identifying top products and category contributions to revenue  
+3. **Salesperson Performance:** Evaluating individual sales rep metrics and top performers  
+4. **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by sales reps, countries, and time periods
 
 🔗 **SQL ETL Script:**  
 **[View ETL & Analytics Script (etl_customers.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
