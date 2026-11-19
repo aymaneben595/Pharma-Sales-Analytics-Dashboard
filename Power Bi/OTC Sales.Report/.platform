@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "OTC Sales"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "588f5726-97fb-5541-9ac5-e9e3df90fb83"
+  }
+}

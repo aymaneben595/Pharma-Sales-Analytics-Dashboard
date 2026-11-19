@@ -1,140 +1,55 @@
-# 💊 Pharma Sales Analytics & Performance Dashboard
+# Over-the-counter pharmacy sales
 
----
+A Power BI report for a sales manager reviewing a simulated over-the-counter pharmacy portfolio. It follows 333 transactions across seven products, seven sales reps and five countries from January through August 2022. Each source row represents one sale. Revenue is the recorded transaction amount in USD.
 
-## 📘 Project Background
+[Download the Power BI report (.pbix)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/refs/heads/main/Power%20Bi/OTC%20Sales.pbix) · [Browse the Power BI project files](Power%20Bi)
 
-This is a personal data analytics project analyzing pharmaceutical sales data to generate actionable insights across **sales management** and **product strategy**.
+Open the downloaded report in Power BI Desktop to explore the included data. To edit the project as source files, clone the repository and open `Power Bi/OTC Sales.pbip` alongside its report and semantic model folders.
 
-The dataset simulates a multi-product pharmaceutical sales environment with focus on:
+![Sales overview with monthly revenue, product and market rankings, and sales rep performance](Images/sales-overview.png)
 
-* **performance tracking**
-* **product mix optimization**
-* **geographic distribution**
+## What drove sales?
 
-Key performance indicators (KPIs) tracked include:
+- The portfolio generated **$58,929.29** and shipped **3,488 boxes**. The average order was **$176.96**.
+- **May** led at **$8,885.00**, followed by July at **$8,754.44**. January was the smallest month at **$5,536.39**. The dataset covers eight months, so a year-over-year seasonality conclusion would need more history.
+- **Digestive Enzyme** led both revenue and volume with **$11,056.61** and **612 boxes**. The **USA** led markets at **$14,109.48**. **Rajesh Patel** led sales reps at **$11,023.53**.
 
-* **Total Amount (USD)**
-* **Total Boxes Shipped**
-* **Total Transactions**
-* **Average Sale Value (ASV)**
+## Explore a sales rep
 
-Insights and recommendations are provided across four main areas:
+Choose **Rep detail** and use the month, country and rep selectors. You can also right-click a rep in the overview table and drill through. Both pages calculate from the same transaction table. Revenue sums the selected rows, orders counts them, and distinct products counts unique product names.
 
-1. **Sales Trends Analysis:** Revenue and transaction volume patterns over time  
-2. **Product & Category Performance:** Identifying top products and category contributions to revenue  
-3. **Salesperson Performance:** Evaluating individual sales rep metrics and top performers  
-4. **Geographic & Detail Analysis:** Deep dive into sales patterns filtered by sales reps, countries, and time periods
+![Filtered rep detail showing four Canadian orders for Nikhil Batra, totaling $971.72 and 51 boxes in April and May 2022](Images/rep-detail.png)
 
-🔗 **SQL ETL Script:**  
-**[View ETL & Analytics Script (etl_customers.sql)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql)**
+| Selection | Revenue | Orders | Boxes | Distinct products | Average order |
+|---|---:|---:|---:|---:|---:|
+| All transactions | $58,929.29 | 333 | 3,488 | 7 | $176.96 |
+| Nikhil Batra · Canada · April and May 2022 | $971.72 | 4 | 51 | 3 | $242.93 |
 
-🐍 **Python ETL/Analysis Script:**  
-**[View ETL & Analytics Script (etl_pipeline.py)](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/blob/060c60af937bf5d403f8c462343349cb9ed070e8/VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py)**
+## Corrections to the earlier project
 
-📊 **Dashboard:**  
-**[⬇️ Download Pharma Sales Light Mode Dashboard.pbix](https://github.com/aymaneben595/Pharma-Sales-Analytics-Dashboard/raw/060c60af937bf5d403f8c462343349cb9ed070e8/Power%20Bi/Pharma%20Sales%20Light%20Mode%20Dashboard.pbix)**
+| Earlier behavior | Correction |
+|---|---|
+| The detail revenue card used the one-row KPI export and repeated the company total after filtering. The product card used a transaction count. | DAX measures sum transaction amounts and count distinct products within the active filters. The four rows shown above include two Cough Syrup orders. |
+| The written summary identified August as the peak and February as the low. | The overview and the findings above use the eight monthly totals recalculated from individual sales. |
+| SQL created views in `analytics`, while Python tried `public` and then an unqualified lookup. Failed queries could produce empty CSVs and a success message. | The loader creates the schema, imports the local CSV and reads qualified views. An invalid or empty import rolls back. The stable export is replaced only after a successful run. |
+| The medium sales-value band ended at $999 and the low band ended at $499. Amounts such as $499.50 fell into the smallest band. | The bands use descending lower bounds of $1,000, $500 and $100, including amounts with cents. |
 
----
+## Rebuild the data
 
-## 🧩 Data Structure & Initial Checks
+The standalone report includes its data. To refresh from a new export, use a dedicated PostgreSQL database for this project. The pipeline replaces the contents of `analytics.sales_data` on each successful full load. It also maintains the summary views for the Python exports.
 
-After a full **ETL process in PostgreSQL**, the dataset contains clean transaction records with key metrics:
+1. Install the Python dependencies with `python -m pip install -r requirements.txt`.
+2. Copy `.env.example` to `.env` and set the database, username, password, host and port for your local instance. The database role needs permission to create the `analytics` schema and its tables and views.
+3. From the repository root, run the following command. To use a replacement CSV with the same header, add `--source "path/to/sales.csv"`.
 
-* **Total Amount:** $58.93K
-* **Total Boxes Shipped:** 3K
-* **Total Transactions:** 333
+```powershell
+python ".\VSCode, SQL & Python\Python\etl_pipeline.py"
+```
 
-Two main analytical artifacts were produced:
+4. In Power BI Desktop, open **Transform data → Edit parameters**. Set **SalesCsvPath** to the full path of the generated `sales_current.csv` and refresh. The default output folder is `VSCode, SQL & Python/Python/outputs`. An empty parameter uses the included, verified portfolio snapshot.
 
-* **`pharma_sales`** → Final structured transaction table (one row per sale)
-* **`vw_sales_export`** → Analytical view for BI tools (with calculated fields like `month_label`, `category`)
+The import was checked in an isolated PostgreSQL 18 database, including a repeat load and a deliberately invalid quantity. The failed load preserved the prior 333 rows. The two selections in the table above were also checked in Power BI Desktop.
 
-<p align="center">
-  <img src="Images/pharma_exp.png" alt="Entity Relationship Diagram (ERD)">
-</p>
+[Source transactions](VSCode%2C%20SQL%20%26%20Python/CSV/pharmacy_otc_sales_data.csv) · [SQL transformations](VSCode%2C%20SQL%20%26%20Python/SQL/etl_customers.sql) · [Python loader](VSCode%2C%20SQL%20%26%20Python/Python/etl_pipeline.py) · [Power BI measures](Power%20Bi/OTC%20Sales.SemanticModel/definition/tables/Sales.tmdl)
 
----
-
-## 📈 Executive Summary
-
-### Overview of Findings
-
-The pharmaceutical market generated **$58.93K in total revenue** with an **Average Sale Value (ASV) of $177**. Notable insights include:
-
-* **Top Performer:** **Rajesh Patel** leads all salespersons in total revenue.
-* **Product Focus:** Digestive, Antiseptic, and Nasal Spray categories drive revenue by volume.
-* **Transaction Volume:** The company completed **333 transactions** across the period.
-
-<p align="center">
-  <img src="Images/pharma.PNG" alt="Pharma Sales Overall Dashboard">
-</p>
-
----
-
-## 🔍 Insights Deep Dive
-
-### **Category 1: Sales Trends Analysis**
-
-* **Total Amount:** **$58.93K** from **333 transactions**, confirming precise tracking.
-* **Sales Trends Over Time:** Peaks in **August 2022 ($8.8K)**, lowest in **February 2022 ($7.3K)**.
-* **Average Sale Value (ASV):** **$177**, indicating stable pricing per transaction.
-
-<p align="center">
-  <img src="Images/pharma over.PNG" alt="Sales Trend Chart">
-</p>
-
-### **Category 2: Product & Category Performance**
-
-* Top revenue-generating products: **Digestive Enzyme, Antiseptic Cream, Nasal Spray**.
-* **Priya Singh**'s top products: **Cough Syrup ($1,626)**, **Antiseptic Cream ($1,540)**.
-* **Nikhil Batra**'s top products: **Cough Syrup ($493)**, **Nasal Spray ($488)**.
-* **Category Volume Share:** **Cough Syrup (28%)**, **Antiseptic Cream (23%)** for Priya Singh.
-
-<p align="center">
-  <img src="Images/pharma ring.PNG" alt="Product Sales by Category Chart">
-</p>
-
-### **Category 3: Salesperson Performance**
-
-* **Rajesh Patel** tops total revenue, followed by **Nikhil Batra** and **Priya Singh**.
-* **Nikhil Batra:** 51 boxes shipped, 4 products sold.
-* **Priya Singh:** ASV **$169**, 54 products sold, 558 boxes shipped.
-
-<p align="center">
-  <img src="Images/pharma sales.PNG" alt="Top Salesperson Chart">
-</p>
-
-### **Category 4: Geographic & Detail Analysis**
-
-* **Primary region:** **North America**.
-* **Priya Singh:** Sales peak **$1.79K in July 2022**, low **$377.24 in April 2022**.
-* **Nikhil Batra in Canada:** ASV **$243**, Total Amount **$58.93K**.
-* Filtered trends: April 22 **$478.18 → May 22 $493.54**.
-
-<p align="center">
-  <img src="Images/pharma3.PNG" alt="Detail View: Nikhil Batra Sales in Canada">
-</p>
-
----
-
-## 💡 Recommendations
-
-1. **Investigate Seasonal Peak:** Analyze **August 2022 peak ($8.8K)** to replicate success.
-2. **Optimize Product Focus:** Prioritize **Digestive Enzyme, Antiseptic Cream, Nasal Spray** in marketing & inventory.
-3. **Target High-ASV Segments:** Study Nikhil Batra’s **$243 ASV** for replication.
-4. **Sales Performance Coaching:** Use top performers like **Rajesh Patel** to uplift mid-to-low-tier reps.
-
----
-
-## ⚙️ Assumptions & Caveats
-
-* **Currency:** Figures standardized in **USD**.
-* **Time Filters:** Detail views filtered by Sales Person, Country, Date.
-* **Geographic Accuracy:** Dependent on correct geo-coding.
-
-<p align="center">
-  <i>Created by Aïmane Benkhadda — Personal Data Analytics Project (Excel, SQL, Power BI, Python)</i>
-  <br>
-  <a href="mailto:aymanebenkhadda5959@gmail.com">aymanebenkhadda5959@gmail.com</a>
-</p>
+Project by Aïmane Benkhadda.

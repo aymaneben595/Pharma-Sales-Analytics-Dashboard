@@ -1,0 +1,36 @@
+{
+  "name": "Dispensary",
+  "dataColors": [
+    "#14695B",
+    "#519C8C",
+    "#AD6C25",
+    "#6D7DAD",
+    "#C8AB73",
+    "#3B617C",
+    "#8DB7A3"
+  ],
+  "foreground": "#173831",
+  "background": "#FFFFFF",
+  "tableAccent": "#14695B",
+  "good": "#14695B",
+  "bad": "#AE4937",
+  "neutral": "#AD6C25",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI",
+      "color": "#173831"
+    },
+    "header": {
+      "fontFace": "Segoe UI",
+      "color": "#173831"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "color": "#173831"
+    },
+    "callout": {
+      "fontFace": "Segoe UI",
+      "color": "#173831"
+    }
+  }
+}

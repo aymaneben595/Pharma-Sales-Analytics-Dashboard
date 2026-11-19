@@ -1,187 +1,132 @@
-#!/usr/bin/env python3
-"""
-🚀 PROJECT: SMART BUDGET — PHARMA SALES ETL PIPELINE
-AUTHOR: Aïmane Benkhadda
-DATE: 2025-10-27
-PURPOSE:
-Automated ETL pipeline for pharma OTC sales data.
-Loads clean data from PostgreSQL, computes KPIs, and exports CSVs for dashboards (Power BI / Excel).
-"""
-
-# ============================================================
-# 0️⃣ IMPORTS & TOOLS
-# ============================================================
-import os
-import sys
+"""Load the source CSV into PostgreSQL and export a consistent Power BI snapshot."""
+import argparse
+import csv
 import logging
-from datetime import datetime
+import os
+from datetime import datetime, timezone
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+import psycopg2
 from dotenv import load_dotenv
 
-# ============================================================
-# 1️⃣ LOGGING SETUP
-# ============================================================
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-log = logging.getLogger("pharma_etl_pipeline")
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+SOURCE = HERE.parent / "CSV" / "pharmacy_otc_sales_data.csv"
+SQL = HERE.parent / "SQL" / "etl_customers.sql"
+HEADERS = ["Date", "Product", "Sales Person", "Boxes Shipped", "Amount ($)", "Country"]
+EXPORTS = {
+    "sales_export": "vw_sales_export",
+    "sales_by_country": "summary_sales_country",
+    "sales_by_salesperson": "summary_sales_person",
+    "sales_by_product": "summary_product_sales",
+    "deal_size": "summary_deal_size",
+    "monthly_sales": "vw_monthly_sales",
+    "data_quality": "vw_null_summary",
+}
 
-# ============================================================
-# 2️⃣ ENVIRONMENT SETUP
-# ============================================================
-load_dotenv()  # Securely loads credentials from .env
 
-PG_USER = os.getenv("PG_USER")
-PG_PASS = os.getenv("PG_PASS")
-PG_HOST = os.getenv("PG_HOST", "localhost")
-PG_PORT = os.getenv("PG_PORT", "5432")
-PG_DB   = os.getenv("PG_DB", "smart_budget")
-OUTPUT_DIR = os.getenv("OUTPUT_DIR", "./outputs")
+def read_view(cursor, name):
+    # Only static view names from EXPORTS are supplied here.
+    cursor.execute(f"SELECT * FROM analytics.{name}")
+    return pd.DataFrame.from_records(cursor.fetchall(), columns=[d.name for d in cursor.description])
 
-# Ensure output folder exists
-Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
-# Validate credentials
-if not PG_USER or not PG_PASS:
-    log.error("PG_USER and PG_PASS must be set in .env file.")
-    raise SystemExit(1)
-
-# ============================================================
-# 3️⃣ DATABASE CONNECTION
-# ============================================================
-def get_engine():
-    """Create a secure PostgreSQL connection engine."""
-    conn_str = f"postgresql+psycopg2://{PG_USER}:{PG_PASS}@{PG_HOST}:{PG_PORT}/{PG_DB}"
-    log.info("🔗 Connecting to PostgreSQL...")
-    engine = create_engine(conn_str, pool_pre_ping=True)
-    log.info("✅ DB engine created.")
-    return engine
-
-# ============================================================
-# 4️⃣ LOAD VIEW HELPER
-# ============================================================
-def load_view(engine, view_name):
-    """Fetch a view from PostgreSQL and return as a Pandas DataFrame."""
-    log.info(f"📥 Loading view: {view_name}")
-    try:
-        df = pd.read_sql_table(view_name, con=engine, schema="public")
-        log.info(f"   → Loaded {len(df):,} rows.")
-        return df
-    except Exception as e:
-        log.warning(f"Failed to load {view_name} via read_sql_table: {e}, trying SELECT * ...")
-        df = pd.read_sql(text(f"SELECT * FROM {view_name};"), con=engine)
-        log.info(f"   → Loaded {len(df):,} rows via SELECT.")
-        return df
-
-# ============================================================
-# 5️⃣ CSV EXPORT HELPER
-# ============================================================
-def export_csv(df: pd.DataFrame, name: str) -> str:
-    """Export a DataFrame to a timestamped CSV file."""
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = os.path.join(OUTPUT_DIR, f"{name}_{ts}.csv")
-    df.to_csv(path, index=False)
-    log.info(f"💾 Exported: {path}")
-    return path
-
-# ============================================================
-# 6️⃣ KPI CALCULATIONS
-# ============================================================
-def compute_kpis(sales_df: pd.DataFrame, top_sales_df: pd.DataFrame, monthly_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute key performance indicators for pharma sales:
-    - Total revenue
-    - Total orders
-    - Average order value (AOV)
-    - Avg revenue per product
-    - Top salesperson
-    - Monthly revenue growth %
-    """
+def compute_kpis(sales_df, top_sales_df, monthly_df):
     if sales_df.empty:
-        log.warning("⚠️ vw_sales_export is empty — skipping KPI computation.")
-        return pd.DataFrame()
+        raise ValueError("The source contains no transactions.")
+    revenue = sales_df["amount_usd"].sum()
+    leader = top_sales_df.sort_values(["total_sales", "sales_person"], ascending=[False, True]).iloc[0]
+    months = monthly_df.sort_values(["year", "month"])
+    growth = None
+    if len(months) >= 2:
+        previous, latest = months.tail(2).to_dict("records")
+        gap = (latest["year"] - previous["year"]) * 12 + latest["month"] - previous["month"]
+        if gap == 1 and previous["total_sales"] != 0:
+            growth = round(100 * (latest["total_sales"] / previous["total_sales"] - 1), 2)
+    return pd.DataFrame([{
+        "total_revenue": revenue,
+        "total_orders": len(sales_df),
+        "avg_order_value": round(revenue / len(sales_df), 2),
+        "avg_revenue_per_product": round(revenue / sales_df["product"].nunique(), 2),
+        "top_salesperson": leader["sales_person"],
+        "top_salesperson_revenue": leader["total_sales"],
+        "monthly_growth_pct": growth,
+    }])
 
-    # Total revenue and orders
-    total_revenue = float(sales_df["amount_usd"].sum())
-    total_orders = int(len(sales_df))
-    avg_order_value = float(total_revenue / total_orders) if total_orders > 0 else 0
 
-    # Avg revenue per product
-    avg_revenue_per_product = float(sales_df.groupby("product")["amount_usd"].sum().mean())
+def import_sales(cursor, source):
+    cursor.execute("""
+        CREATE TEMP TABLE incoming (
+            source_row integer GENERATED ALWAYS AS IDENTITY, sale_date date NOT NULL,
+            product text NOT NULL CHECK (trim(product) <> ''),
+            sales_person text NOT NULL CHECK (trim(sales_person) <> ''),
+            boxes_shipped integer NOT NULL CHECK (boxes_shipped >= 0),
+            amount_usd numeric NOT NULL CHECK (amount_usd >= 0 AND amount_usd <> 'NaN'),
+            country text NOT NULL CHECK (trim(country) <> '')
+        ) ON COMMIT DROP
+    """)
+    with source.open(encoding="utf-8-sig", newline="") as stream:
+        if next(csv.reader(stream), None) != HEADERS:
+            raise ValueError(f"Unexpected CSV header in {source}. Expected {HEADERS}.")
+        cursor.copy_expert(
+            "COPY incoming (sale_date, product, sales_person, boxes_shipped, amount_usd, country) "
+            "FROM STDIN WITH (FORMAT CSV)", stream)
+    cursor.execute("SELECT COUNT(*) FROM incoming")
+    if not cursor.fetchone()[0]:
+        raise ValueError("The input CSV is empty.")
+    cursor.execute("TRUNCATE analytics.sales_data RESTART IDENTITY")
+    cursor.execute("""
+        INSERT INTO analytics.sales_data (sale_date, product, sales_person, boxes_shipped, amount_usd, country)
+        SELECT sale_date, product, sales_person, boxes_shipped, amount_usd, country
+        FROM incoming ORDER BY source_row
+    """)
 
-    # Top salesperson info
-    top_salesperson = top_sales_df.iloc[0]["sales_person"] if not top_sales_df.empty else "N/A"
-    top_salesperson_revenue = float(top_sales_df.iloc[0]["total_sales"]) if not top_sales_df.empty else 0
 
-    # Monthly growth %
-    monthly_growth_pct = 0.0
-    if not monthly_df.empty:
-        mdf = monthly_df.sort_values(["year", "month"])
-        last = float(mdf.iloc[-1]["total_sales"])
-        prev = float(mdf.iloc[-2]["total_sales"]) if len(mdf) > 1 else last
-        if prev != 0:
-            monthly_growth_pct = (last - prev) / prev * 100
-
-    # Package KPIs
-    kpis = {
-        "total_revenue": round(total_revenue, 2),
-        "total_orders": total_orders,
-        "avg_order_value": round(avg_order_value, 2),
-        "avg_revenue_per_product": round(avg_revenue_per_product, 2),
-        "top_salesperson": top_salesperson,
-        "top_salesperson_revenue": round(top_salesperson_revenue, 2),
-        "monthly_growth_pct": round(monthly_growth_pct, 2)
-    }
-
-    return pd.DataFrame([kpis])
-
-# ============================================================
-# 7️⃣ PIPELINE EXECUTION
-# ============================================================
-def run_pipeline():
-    engine = get_engine()
-
-    # Views in the SQL pipeline
-    views = {
-        "vw_sales_export": "sales_export",
-        "summary_sales_country": "sales_by_country",
-        "summary_sales_person": "sales_by_salesperson",
-        "summary_product_sales": "sales_by_product",
-        "summary_deal_size": "deal_size",
-        "vw_monthly_sales": "monthly_sales",
-        "vw_null_summary": "data_quality"
-    }
-
-    # Load all views
-    dfs = {}
-    for view_name, label in views.items():
-        try:
-            dfs[label] = load_view(engine, view_name)
-        except Exception as e:
-            log.warning(f"⚠️ Skipping {view_name}: {e}")
-            dfs[label] = pd.DataFrame()
-
-    # Export CSVs
-    for label, df in dfs.items():
-        export_csv(df, label)
-
-    # Compute KPI summary
-    kpi_df = compute_kpis(
-        sales_df=dfs.get("sales_export", pd.DataFrame()),
-        top_sales_df=dfs.get("sales_by_salesperson", pd.DataFrame()),
-        monthly_df=dfs.get("monthly_sales", pd.DataFrame())
+def run_pipeline(source=SOURCE, output_dir=None):
+    load_dotenv(ROOT / ".env")
+    output_dir = Path(output_dir or os.getenv("OUTPUT_DIR", HERE / "outputs"))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    connection = psycopg2.connect(
+        dbname=os.environ["PG_DB"], user=os.environ["PG_USER"],
+        password=os.getenv("PG_PASS"), host=os.getenv("PG_HOST", "localhost"),
+        port=os.getenv("PG_PORT", "5432"),
     )
-    export_csv(kpi_df, "kpi_summary")
+    try:
+        with connection, connection.cursor() as cursor:
+            # Hold the session lock until the matching CSV is published as well.
+            cursor.execute("SELECT pg_advisory_lock(hashtext('pharma-sales-etl'))")
+            cursor.execute(SQL.read_text(encoding="utf-8-sig"))
+            import_sales(cursor, Path(source))
+            reports = {label: read_view(cursor, view) for label, view in EXPORTS.items()}
+            reports["sales_export"] = reports["sales_export"].sort_values("sale_id")
+            reports["kpi_summary"] = compute_kpis(reports["sales_export"], reports["sales_by_salesperson"], reports["monthly_sales"])
+        publish_reports(reports, output_dir)
+        return reports
+    finally:
+        connection.close()
 
-    log.info("✅ Pharma ETL pipeline completed. Outputs in: %s", os.path.abspath(OUTPUT_DIR))
 
-# ============================================================
-# 8️⃣ MAIN EXECUTION
-# ============================================================
+def publish_reports(reports, output_dir):
+    # Historical files keep the original naming convention. Power BI can point to one stable file.
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+    with TemporaryDirectory(dir=output_dir) as scratch:
+        staging = Path(scratch)
+        for label, data in reports.items():
+            data.to_csv(staging / f"{label}_{stamp}.csv", index=False)
+        reports["sales_export"].to_csv(staging / "sales_current.csv", index=False)
+        for label in reports:
+            filename = f"{label}_{stamp}.csv"
+            (staging / filename).replace(output_dir / filename)
+        (staging / "sales_current.csv").replace(output_dir / "sales_current.csv")
+    logging.info("Exported %s transactions to %s", len(reports["sales_export"]), output_dir)
+
+
 if __name__ == "__main__":
-    run_pipeline()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, default=SOURCE)
+    parser.add_argument("--output-dir", type=Path)
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    run_pipeline(args.source, args.output_dir)

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "OTC Sales"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "e74c8e36-1ab0-5c54-b1e4-0c0f21cd895e"
+  }
+}

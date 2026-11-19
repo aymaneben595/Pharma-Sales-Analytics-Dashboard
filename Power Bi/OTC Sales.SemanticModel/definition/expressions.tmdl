@@ -1,0 +1,6 @@
+/// Optional path to the CSV published by the Pharma ETL. An empty value loads the portfolio snapshot.
+expression SalesCsvPath = "" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=false]
+	lineageTag: 5b8f492b-1279-54a4-bf8d-4d0762a6be01
+
+	annotation PBI_ResultType = Text
+

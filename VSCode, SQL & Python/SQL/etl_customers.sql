@@ -11,14 +11,9 @@
 /* =========================================================
    1️⃣ CREATE DATABASE & MAIN TABLE
    ========================================================= */
--- Uncomment if you need to create the database
--- CREATE DATABASE db;
--- Connect before running: \c db
+CREATE SCHEMA IF NOT EXISTS analytics;
 
--- Drop and recreate main table (raw CSV import)
-DROP TABLE IF EXISTS analytics.sales_data;
-
-CREATE TABLE analytics.sales_data (
+CREATE TABLE IF NOT EXISTS analytics.sales_data (
     sale_id         SERIAL PRIMARY KEY,      -- Unique transaction identifier
     sale_date       DATE,                    -- Sale date
     product         VARCHAR,                 -- Product name
@@ -28,10 +23,7 @@ CREATE TABLE analytics.sales_data (
     country         VARCHAR                  -- Country of sale
 );
 
--- ✅ Load CSV (adjust file path as needed)
--- COPY analytics.sales_data (sale_date, product, sales_person, boxes_shipped, amount_usd, country)
--- FROM 'C:\Path\To\CSV\pharmacy_otc_sales_data.csv'
--- DELIMITER ',' CSV HEADER;
+-- The Python entry point loads the source CSV with client-side COPY in one transaction.
 
 /* =========================================================
    2️⃣ CLEANING — CREATE CLEAN BASE VIEW
@@ -45,7 +37,7 @@ SELECT
     INITCAP(TRIM(sales_person)) AS sales_person,       -- Capitalize sales person names
     COALESCE(boxes_shipped, 0) AS boxes_shipped,       -- Replace NULLs with 0
     COALESCE(amount_usd, 0) AS amount_usd,            -- Replace NULLs with 0
-    INITCAP(TRIM(country)) AS country,                 -- Capitalize country names
+    CASE UPPER(TRIM(country)) WHEN 'UK' THEN 'UK' WHEN 'USA' THEN 'USA' ELSE INITCAP(TRIM(country)) END AS country,                 -- Capitalize country names
 
     -- 🧮 Derived metrics for time analysis
     DATE_PART('year', sale_date) AS year,
@@ -55,8 +47,8 @@ SELECT
     -- 💰 Deal Size Categorization based on amount
     CASE
         WHEN amount_usd >= 1000 THEN 'High Value'
-        WHEN amount_usd BETWEEN 500 AND 999 THEN 'Medium Value'
-        WHEN amount_usd BETWEEN 100 AND 499 THEN 'Low Value'
+        WHEN amount_usd >= 500 THEN 'Medium Value'
+        WHEN amount_usd >= 100 THEN 'Low Value'
         ELSE 'Small Value'
     END AS deal_size_category
 

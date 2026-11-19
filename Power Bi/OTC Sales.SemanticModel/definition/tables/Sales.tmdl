@@ -1,0 +1,131 @@
+table Sales
+	lineageTag: 3da2ad92-e26e-5bf6-a7bf-14c6380dfb22
+
+	measure Revenue = SUM(Sales[Amount])
+		formatString: $#,0.00;($#,0.00);$0.00
+		lineageTag: b5b2d12e-7781-5acb-9542-689569f403f3
+
+	measure Orders = COUNTROWS(Sales)
+		formatString: #,0
+		lineageTag: d793daac-50ad-5d3e-9997-37f600988856
+
+	measure 'Boxes shipped' = SUM(Sales[Boxes])
+		formatString: #,0
+		lineageTag: 73daf6b5-f685-5d67-ac31-c29115c85755
+
+	measure 'Average order value' = DIVIDE([Revenue], [Orders])
+		formatString: $#,0.00
+		lineageTag: 14f5146e-708f-5b92-944c-ecdf3ad51832
+
+	measure 'Revenue per box' = DIVIDE([Revenue], [Boxes shipped])
+		formatString: $#,0.00
+		lineageTag: bf80811c-5581-50bc-954b-0c4374737b88
+
+	measure 'Distinct products' = DISTINCTCOUNT(Sales[Product])
+		formatString: #,0
+		lineageTag: 7f8bbf48-72ea-5561-83bc-d7e1ccbc8da0
+
+	column 'Sale ID'
+		dataType: int64
+		isKey
+		lineageTag: 063c5bb0-da2d-56f4-8454-579c3dbe2b40
+		summarizeBy: none
+		sourceColumn: sale_id
+
+	column 'Sale date'
+		dataType: dateTime
+		formatString: dd MMM yyyy
+		lineageTag: 53c623f0-362e-52ea-9bc5-9c9926b445f8
+		summarizeBy: none
+		sourceColumn: sale_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Product
+		dataType: string
+		lineageTag: f8803aa9-1a37-56e2-8722-8c7a52707ba4
+		summarizeBy: none
+		sourceColumn: product
+
+	column 'Sales rep'
+		dataType: string
+		lineageTag: e21a93a5-3b49-5f8c-9265-03634967d14a
+		summarizeBy: none
+		sourceColumn: sales_person
+
+	column Boxes
+		dataType: int64
+		lineageTag: 4c16e580-f249-5d2d-8791-f90ebd4f525a
+		summarizeBy: none
+		sourceColumn: boxes_shipped
+
+	column Amount
+		dataType: decimal
+		formatString: $#,0.00
+		lineageTag: 1f5d91d9-b319-5e81-8a3b-6bebf86d1854
+		summarizeBy: none
+		sourceColumn: amount_usd
+
+	column Country
+		dataType: string
+		lineageTag: 48d4d406-6766-5252-a7e4-a64771f6e63d
+		summarizeBy: none
+		sourceColumn: country
+
+	column Month
+		dataType: string
+		lineageTag: 46584c45-44e9-5792-925f-3228b3a5d785
+		summarizeBy: none
+		sourceColumn: month_label
+		sortByColumn: 'Month start'
+
+	column 'Month start'
+		dataType: dateTime
+		isHidden
+		formatString: dd MMM yyyy
+		lineageTag: 1b194332-df4d-5aee-8b66-031e56b021ee
+		summarizeBy: none
+		sourceColumn: month_start
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: string
+		lineageTag: d3769d08-0e68-4081-9ae1-2efc4f718da6
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'month 2'
+		dataType: string
+		lineageTag: 027768a2-cead-4788-8743-0ac2a3001daf
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column deal_size_category
+		dataType: string
+		lineageTag: 541d55e7-dea3-4981-9af4-ea1b0a0626d3
+		summarizeBy: none
+		sourceColumn: deal_size_category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Input = if SalesCsvPath = null or Text.Trim(SalesCsvPath) = "" then
+				        Binary.Decompress(Binary.FromText("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", BinaryEncoding.Base64), Compression.GZip)
+				        else File.Contents(SalesCsvPath),
+				    Csv = Csv.Document(Input, [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Csv, [PromoteAllScalars=true]),
+				    Dates = Table.TransformColumnTypes(Headers, {{"sale_id", Int64.Type}, {"sale_date", type date}, {"boxes_shipped", Int64.Type}, {"amount_usd", Currency.Type}, {"product", type text}, {"sales_person", type text}, {"country", type text}, {"month_label", type text}}, "en-US"),
+				    Result = Table.AddColumn(Dates, "month_start", each Date.StartOfMonth([sale_date]), type date)
+				in
+				    Result
+
+	annotation PBI_ResultType = Table
+
